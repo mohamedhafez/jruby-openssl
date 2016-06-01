@@ -393,20 +393,20 @@ public class SSLSocket extends RubyObject {
                     if ( result[0] == 0 ) {
                         if ((operations & SelectionKey.OP_READ) != 0 && (operations & SelectionKey.OP_WRITE) != 0) {
                             if ( key.isReadable() ) {
-                                writeWouldBlock(runtime, exception, result); return;
+                                writeWouldBlock(runtime, exception, result);
                             }
                             //else if ( key.isWritable() ) {
                             //    readWouldBlock(runtime, exception, result);
                             //}
                             else { //neither, pick one
-                                readWouldBlock(runtime, exception, result); return;
+                                readWouldBlock(runtime, exception, result);
                             }
                         }
                         else if ((operations & SelectionKey.OP_READ) != 0) {
-                            readWouldBlock(runtime, exception, result); return;
+                            readWouldBlock(runtime, exception, result);
                         }
                         else if ((operations & SelectionKey.OP_WRITE) != 0) {
-                            writeWouldBlock(runtime, exception, result); return;
+                            writeWouldBlock(runtime, exception, result);
                         }
                     }
                 }
