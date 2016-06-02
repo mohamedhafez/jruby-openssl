@@ -78,6 +78,11 @@ import static org.jruby.ext.openssl.OpenSSL.*;
  */
 public class SSLSocket extends RubyObject {
 
+    //Just to make sure I'm actually running this code, I'll take this out before issuing a pull request
+    public static int mohamedversion() {
+        return "mohameds eagain fix";
+    }
+
     private static final long serialVersionUID = -2084816623554406237L;
 
     private static final ObjectAllocator ALLOCATOR = new ObjectAllocator() {
@@ -384,49 +389,53 @@ public class SSLSocket extends RubyObject {
         final SelectionKey key = channel.register(selector, operations);
 
         try {
-            io.addBlockingThread(thread);
-
             final int[] result = new int[1];
 
-            thread.executeBlockingTask(new RubyThread.BlockingTask() {
-                public void run() throws InterruptedException {
-                    try {
-                        if ( ! blocking ) {
-                            result[0] = selector.selectNow();
+            if ( ! blocking ) {
+                try {
+                    result[0] = selector.selectNow();
 
-                            if ( result[0] == 0 ) {
-                                if ((operations & SelectionKey.OP_READ) != 0 && (operations & SelectionKey.OP_WRITE) != 0) {
-                                    if ( key.isReadable() ) {
-                                        writeWouldBlock(runtime, exception, result); return;
-                                    }
-                                    //else if ( key.isWritable() ) {
-                                    //    readWouldBlock(runtime, exception, result);
-                                    //}
-                                    else { //neither, pick one
-                                        readWouldBlock(runtime, exception, result); return;
-                                    }
-                                }
-                                else if ((operations & SelectionKey.OP_READ) != 0) {
-                                    readWouldBlock(runtime, exception, result); return;
-                                }
-                                else if ((operations & SelectionKey.OP_WRITE) != 0) {
-                                    writeWouldBlock(runtime, exception, result); return;
-                                }
+                    if ( result[0] == 0 ) {
+                        if ((operations & SelectionKey.OP_READ) != 0 && (operations & SelectionKey.OP_WRITE) != 0) {
+                            if ( key.isReadable() ) {
+                                writeWouldBlock(runtime, exception, result);
+                            }
+                            //else if ( key.isWritable() ) {
+                            //    readWouldBlock(runtime, exception, result);
+                            //}
+                            else { //neither, pick one
+                                readWouldBlock(runtime, exception, result);
                             }
                         }
-                        else {
-                            result[0] = selector.select();
+                        else if ((operations & SelectionKey.OP_READ) != 0) {
+                            readWouldBlock(runtime, exception, result);
+                        }
+                        else if ((operations & SelectionKey.OP_WRITE) != 0) {
+                            writeWouldBlock(runtime, exception, result);
                         }
                     }
-                    catch (IOException ioe) {
-                        throw runtime.newRuntimeError("Error with selector: " + ioe.getMessage());
+                }
+                catch (IOException ioe) {
+                    throw runtime.newRuntimeError("Error with selector: " + ioe.getMessage());
+                }
+            } else {
+                io.addBlockingThread(thread);
+                thread.executeBlockingTask(new RubyThread.BlockingTask() {
+                    public void run() throws InterruptedException {
+                        try {
+                            result[0] = selector.select();
+                        }
+                        catch (IOException ioe) {
+                            throw runtime.newRuntimeError("Error with selector: " + ioe.getMessage());
+                        }
                     }
-                }
 
-                public void wakeup() {
-                    selector.wakeup();
-                }
-            });
+                    public void wakeup() {
+                        selector.wakeup();
+                    }
+                });
+            }
+
 
             switch ( result[0] ) {
                 case READ_WOULD_BLOCK_RESULT :
@@ -439,7 +448,12 @@ public class SSLSocket extends RubyObject {
                         Set<SelectionKey> keySet = selector.selectedKeys();
                         if ( keySet.iterator().next() == key ) return Boolean.TRUE;
                     }
-                    return Boolean.FALSE;
+                    if (blocking) {
+                        return Boolean.FALSE;
+                    } else {
+                        throw runtime.newRuntimeError("Error with selector: selectNow selected key not found");
+                    }
+
             }
         }
         catch (InterruptedException interrupt) { return Boolean.FALSE; }
@@ -469,11 +483,13 @@ public class SSLSocket extends RubyObject {
                 debugStackTrace(runtime, e);
             }
 
-            // remove this thread as a blocker against the given IO
-            io.removeBlockingThread(thread);
+            if (blocking) {
+                // remove this thread as a blocker against the given IO
+                io.removeBlockingThread(thread);
 
-            // clear thread state from blocking call
-            thread.afterBlockingCall();
+                // clear thread state from blocking call
+                thread.afterBlockingCall();
+            }
         }
     }
 
