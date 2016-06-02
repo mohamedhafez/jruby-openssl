@@ -79,7 +79,7 @@ import static org.jruby.ext.openssl.OpenSSL.*;
 public class SSLSocket extends RubyObject {
 
     //Just to make sure I'm actually running this code, I'll take this out before issuing a pull request
-    public static int mohamedversion() {
+    public static String mohamedversion() {
         return "mohameds eagain fix";
     }
 
