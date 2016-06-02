@@ -448,11 +448,11 @@ public class SSLSocket extends RubyObject {
                         Set<SelectionKey> keySet = selector.selectedKeys();
                         if ( keySet.iterator().next() == key ) return Boolean.TRUE;
                     }
-                    if (blocking) {
+                    //if (blocking) {
                         return Boolean.FALSE;
-                    } else {
-                        throw runtime.newRuntimeError("Error with selector: selectNow selected key not found");
-                    }
+                    //} else {
+                    //    throw runtime.newRuntimeError("Error with selector: selectNow selected key not found");
+                    //}
 
             }
         }
