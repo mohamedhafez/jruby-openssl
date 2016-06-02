@@ -78,6 +78,11 @@ import static org.jruby.ext.openssl.OpenSSL.*;
  */
 public class SSLSocket extends RubyObject {
 
+    //Just to make sure I'm actually running this code, I'll take this out before issuing a pull request
+    public static String mohamedversion() {
+        return "mohameds eagain fix v2";
+    }
+
     private static final long serialVersionUID = -2084816623554406237L;
 
     private static final ObjectAllocator ALLOCATOR = new ObjectAllocator() {
