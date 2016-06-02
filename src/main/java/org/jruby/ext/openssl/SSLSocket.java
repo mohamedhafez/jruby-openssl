@@ -80,7 +80,7 @@ public class SSLSocket extends RubyObject {
 
     //Just to make sure I'm actually running this code, I'll take this out before issuing a pull request
     public static String mohamedversion() {
-        return "mohameds eagain fix v3";
+        return "mohameds eagain fix v4";
     }
 
     private static final long serialVersionUID = -2084816623554406237L;
@@ -446,14 +446,18 @@ public class SSLSocket extends RubyObject {
                 default :
                     if ( result[0] >= 1 ) {
                         Set<SelectionKey> keySet = selector.selectedKeys();
-                        if ( keySet.iterator().next() == key ) return Boolean.TRUE;
-                    }
-                    //if (blocking) {
-                        return Boolean.FALSE;
-                    //} else {
-                    //    throw runtime.newRuntimeError("Error with selector: selectNow selected key not found");
-                    //}
+                        boolean first_key = (keySet.iterator().next() == key);
 
+                        if (result[0] > 1 || keySet.size() > 1 || !first_key) {
+                            debug(runtime, "\n\nweird waitSelect result! result[0]: " + result[0] + ", keySet.size(): " + keySet.size() + ", first_key: " + first_key + ", contains: " + keySet.contains(key) + "\n", new Throwable());
+                        }
+
+                        if ( first_key ) return Boolean.TRUE;
+                    } else {
+                        debug(runtime, "\n\nwaitSelect result < 0\n", new Throwable());
+                    }
+
+                    return Boolean.FALSE; // throw runtime.newRuntimeError("Error with selector: selectNow selected key not found");
             }
         }
         catch (InterruptedException interrupt) { return Boolean.FALSE; }
