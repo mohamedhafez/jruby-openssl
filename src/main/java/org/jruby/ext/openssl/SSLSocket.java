@@ -78,6 +78,10 @@ import static org.jruby.ext.openssl.OpenSSL.*;
  */
 public class SSLSocket extends RubyObject {
 
+    public static int mohamedtest() {
+        return 666;
+    }
+
     private static final long serialVersionUID = -2084816623554406237L;
 
     private static final ObjectAllocator ALLOCATOR = new ObjectAllocator() {
@@ -373,6 +377,7 @@ public class SSLSocket extends RubyObject {
     // be OK to set configureBlocking(false) permanently.
     private Object waitSelect(final int operations, final boolean blocking, final boolean exception)
         throws IOException {
+        throw runtime.newRuntimeError("TESTTESTTESTTEST");
         final SocketChannelImpl channel = socketChannelImpl();
         if ( ! channel.isSelectable() ) return Boolean.TRUE;
 
