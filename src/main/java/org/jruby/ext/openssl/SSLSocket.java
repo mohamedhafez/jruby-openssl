@@ -80,7 +80,7 @@ public class SSLSocket extends RubyObject {
 
     //Just to make sure I'm actually running this code, I'll take this out before issuing a pull request
     public static String mohamedversion() {
-        return "mohameds eagain fix v7";
+        return "mohameds eagain fix v8";
     }
 
     private static final long serialVersionUID = -2084816623554406237L;
@@ -476,6 +476,7 @@ public class SSLSocket extends RubyObject {
                 if ( selector != null ) selector.selectNow();
             }
             catch (Exception e) { // ignore
+                debug(runtime, "\n\n\nwaitSelect finally error, cleaning up key and selector");
                 debugStackTrace(runtime, e);
             }
 
@@ -486,6 +487,7 @@ public class SSLSocket extends RubyObject {
                 }
             }
             catch (Exception e) { // ignore
+                debug(runtime, "\n\n\nwaitSelect finally error, putting back the selector");
                 debugStackTrace(runtime, e);
             }
 
