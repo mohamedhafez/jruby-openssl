@@ -80,7 +80,7 @@ public class SSLSocket extends RubyObject {
 
     //Just to make sure I'm actually running this code, I'll take this out before issuing a pull request
     public static String mohamedversion() {
-        return "mohameds eagain fix v6";
+        return "mohameds eagain fix v7";
     }
 
     private static final long serialVersionUID = -2084816623554406237L;
@@ -450,13 +450,13 @@ public class SSLSocket extends RubyObject {
 
                         if (result[0] > 1 || keySet.size() > 1 || !first_key || !keySet.contains(key)) {
                             debug(runtime, "\n\n\nweird waitSelect result! result[0]: " + result[0] + ", keySet.size(): " + keySet.size() + ", first_key: " + first_key + ", contains: " + keySet.contains(key));
-                            new Throwable().printStackTrace();
+                            debugStackTrace(runtime, new Throwable());
                         }
 
                         if ( first_key ) return Boolean.TRUE;
                     } else {
                         debug(runtime, "\n\n\nwaitSelect result < 0");
-                        new Throwable().printStackTrace();
+                        debugStackTrace(runtime, new Throwable());
                     }
 
                     return Boolean.FALSE; // throw runtime.newRuntimeError("Error with selector: selectNow selected key not found");
@@ -923,7 +923,7 @@ public class SSLSocket extends RubyObject {
         }
         catch (IOException e) {
             // ignore?
-            debug(getRuntime(), "SSLSocket.close doShutdown failed", e);
+            //debug(getRuntime(), "SSLSocket.close doShutdown failed", e);
         }
     }
 
